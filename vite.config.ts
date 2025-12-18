@@ -4,7 +4,6 @@
   import path from 'path';
 
   export default defineConfig({ 
-    base: '/Smartbuildingmanagementappcommunity/' ,
     plugins: [react()],
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
