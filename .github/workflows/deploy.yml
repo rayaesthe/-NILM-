@@ -1,5 +1,8 @@
-name: Deploy to GitHub Pages
+你的仓库里没有 package-lock.json/yarn.lock，所以 setup-node 的 cache: 'npm' 报错。去掉缓存即可，或提交锁文件。
 
+这是去掉缓存后的完整 yml（用官方 Pages 部署，构建输出在 build 目录）：
+
+name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
@@ -11,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
 
 jobs:
@@ -19,20 +22,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
-      - run: npm install
-      - run: npm run build
-      - run: |
-          echo "List build output:"
+
+      - name: Install deps
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Build
+        run: npm run build
+
+      - name: Check output
+        run: |
           ls -la
           ls -la build || true
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./build   # 如果你改回 dist，这里同步改成 ./dist
+          path: ./build   # 如果改回 dist，这里改成 ./dist
 
   deploy:
     needs: build
